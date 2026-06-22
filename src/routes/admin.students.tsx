@@ -51,12 +51,20 @@ function StudentsPage() {
                   <td className="p-3 text-muted-foreground hidden md:table-cell">{s.email}</td>
                   <td className="p-3 text-right font-semibold">{s.total_points}</td>
                   <td className="p-3 text-right">
-                    <button
-                      onClick={() => setBonusFor({ id: s.id, name: s.full_name })}
-                      className="glass rounded-lg px-2.5 py-1 text-xs flex items-center gap-1 ml-auto hover:bg-white/10"
-                    >
-                      <Gift className="h-3 w-3" /> Bonus
-                    </button>
+                    <div className="flex gap-1.5 justify-end">
+                      <button
+                        onClick={() => setModalFor({ id: s.id, name: s.full_name, mode: "add" })}
+                        className="glass rounded-lg px-2.5 py-1 text-xs flex items-center gap-1 hover:bg-white/10"
+                      >
+                        <Gift className="h-3 w-3" /> Bonus
+                      </button>
+                      <button
+                        onClick={() => setModalFor({ id: s.id, name: s.full_name, mode: "remove" })}
+                        className="glass rounded-lg px-2.5 py-1 text-xs flex items-center gap-1 text-destructive hover:bg-destructive/10"
+                      >
+                        <Minus className="h-3 w-3" /> Remove
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -65,12 +73,13 @@ function StudentsPage() {
         </div>
       )}
 
-      {bonusFor && (
+      {modalFor && (
         <BonusModal
-          student={bonusFor}
-          onClose={() => setBonusFor(null)}
+          student={{ id: modalFor.id, name: modalFor.name }}
+          initialMode={modalFor.mode}
+          onClose={() => setModalFor(null)}
           onDone={() => {
-            setBonusFor(null);
+            setModalFor(null);
             qc.invalidateQueries({ queryKey: ["all-students"] });
           }}
         />
