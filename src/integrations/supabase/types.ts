@@ -14,16 +14,204 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      achievements: {
+        Row: {
+          code: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          threshold: number | null
+        }
+        Insert: {
+          code: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          threshold?: number | null
+        }
+        Update: {
+          code?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          threshold?: number | null
+        }
+        Relationships: []
+      }
+      activities: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_time: string | null
+          event_date: string
+          id: string
+          is_active: boolean
+          max_scans_per_student: number
+          name: string
+          points: number
+          qr_code: string
+          start_time: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_time?: string | null
+          event_date: string
+          id?: string
+          is_active?: boolean
+          max_scans_per_student?: number
+          name: string
+          points?: number
+          qr_code?: string
+          start_time?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_time?: string | null
+          event_date?: string
+          id?: string
+          is_active?: boolean
+          max_scans_per_student?: number
+          name?: string
+          points?: number
+          qr_code?: string
+          start_time?: string | null
+        }
+        Relationships: []
+      }
+      attendance: {
+        Row: {
+          activity_id: string
+          id: string
+          points_awarded: number
+          scanned_at: string
+          student_id: string
+        }
+        Insert: {
+          activity_id: string
+          id?: string
+          points_awarded?: number
+          scanned_at?: string
+          student_id: string
+        }
+        Update: {
+          activity_id?: string
+          id?: string
+          points_awarded?: number
+          scanned_at?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          total_points: number
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id: string
+          total_points?: number
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          total_points?: number
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      award_bonus_points: {
+        Args: { _points: number; _reason: string; _student: string }
+        Returns: Json
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      scan_qr_code: { Args: { _qr: string }; Returns: Json }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "student"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +338,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "student"],
+    },
   },
 } as const
