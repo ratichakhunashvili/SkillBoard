@@ -5,7 +5,7 @@ import QRCode from "qrcode";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader } from "@/components/loader";
 import { toast } from "sonner";
-import { Plus, QrCode, Trash2, Power, X, Download } from "lucide-react";
+import { Plus, QrCode, Trash2, Power, X, Download, Users, UserMinus } from "lucide-react";
 
 export const Route = createFileRoute("/admin/activities")({
   component: ActivitiesPage,
@@ -28,6 +28,7 @@ function ActivitiesPage() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
   const [qrFor, setQrFor] = useState<Activity | null>(null);
+  const [logFor, setLogFor] = useState<Activity | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["activities"],
@@ -116,6 +117,12 @@ function ActivitiesPage() {
                   <QrCode className="h-3 w-3" /> QR
                 </button>
                 <button
+                  onClick={() => setLogFor(a)}
+                  className="glass rounded-lg px-3 py-1.5 text-xs flex items-center gap-1 hover:bg-white/10"
+                >
+                  <Users className="h-3 w-3" /> Log
+                </button>
+                <button
                   onClick={() => {
                     setEditing(a);
                     setShowForm(true);
@@ -155,7 +162,89 @@ function ActivitiesPage() {
         />
       )}
       {qrFor && <QrModal activity={qrFor} onClose={() => setQrFor(null)} />}
+      {logFor && <LogModal activity={logFor} onClose={() => setLogFor(null)} />}
     </div>
+  );
+}
+
+function LogModal({ activity, onClose }: { activity: Activity; onClose: () => void }) {
+  const qc = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ["attendance-log", activity.id],
+    queryFn: async () => {
+      const { data: att, error } = await supabase
+        .from("attendance")
+        .select("id, student_id, points_awarded, scanned_at")
+        .eq("activity_id", activity.id)
+        .order("scanned_at", { ascending: false });
+      if (error) throw error;
+      const ids = Array.from(new Set((att ?? []).map((a) => a.student_id)));
+      let names: Record<string, string> = {};
+      if (ids.length) {
+        const { data: ppl } = await supabase.rpc("get_public_names", { _ids: ids });
+        for (const p of ppl ?? []) names[p.id] = p.full_name;
+      }
+      return (att ?? []).map((a) => ({ ...a, full_name: names[a.student_id] ?? "Unknown" }));
+    },
+  });
+
+  const remove = useMutation({
+    mutationFn: async (attendanceId: string) => {
+      const { data, error } = await (supabase.rpc as any)("admin_remove_attendance", {
+        _attendance_id: attendanceId,
+      });
+      if (error) throw error;
+      if (data && data.ok === false) throw new Error(data.error ?? "Failed");
+    },
+    onSuccess: () => {
+      toast.success("Removed from activity");
+      qc.invalidateQueries({ queryKey: ["attendance-log", activity.id] });
+      qc.invalidateQueries({ queryKey: ["leaderboard"] });
+      qc.invalidateQueries({ queryKey: ["students"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
+  });
+
+  return (
+    <Modal onClose={onClose}>
+      <h2 className="text-lg font-semibold mb-1">{activity.name}</h2>
+      <p className="text-xs text-muted-foreground mb-4">
+        Attendance log — remove a person to revoke their points for this activity.
+      </p>
+      {isLoading || !data ? (
+        <Loader />
+      ) : data.length === 0 ? (
+        <div className="text-sm text-muted-foreground text-center py-8">
+          No one has scanned this activity yet.
+        </div>
+      ) : (
+        <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+          {data.map((row) => (
+            <div
+              key={row.id}
+              className="flex items-center justify-between gap-3 glass rounded-xl px-3 py-2"
+            >
+              <div className="min-w-0">
+                <div className="text-sm font-medium truncate">{row.full_name}</div>
+                <div className="text-[11px] text-muted-foreground">
+                  {new Date(row.scanned_at).toLocaleString()} · {row.points_awarded} pts
+                </div>
+              </div>
+              <button
+                disabled={remove.isPending}
+                onClick={() => {
+                  if (confirm(`Remove ${row.full_name} from "${activity.name}"? Their ${row.points_awarded} points will be subtracted.`))
+                    remove.mutate(row.id);
+                }}
+                className="shrink-0 rounded-lg px-2.5 py-1.5 text-xs text-destructive hover:bg-destructive/10 flex items-center gap-1 disabled:opacity-60"
+              >
+                <UserMinus className="h-3 w-3" /> Remove
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </Modal>
   );
 }
 
