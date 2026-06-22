@@ -217,6 +217,23 @@ export type Database = {
         Returns: Json
       }
       get_activity_qr: { Args: { _activity_id: string }; Returns: string }
+      get_leaderboard: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_icon: string
+          avatar_url: string
+          full_name: string
+          id: string
+          total_points: number
+        }[]
+      }
+      get_public_names: {
+        Args: { _ids: string[] }
+        Returns: {
+          full_name: string
+          id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

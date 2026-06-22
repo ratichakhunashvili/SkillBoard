@@ -20,12 +20,8 @@ function LeaderboardPage() {
     queryKey: ["leaderboard", range],
     queryFn: async () => {
       if (range === "all") {
-        const { data } = await supabase
-          .from("profiles")
-          .select("id, full_name, total_points")
-          .order("total_points", { ascending: false })
-          .limit(100);
-        return (data ?? []).map((p) => ({
+        const { data } = await supabase.rpc("get_leaderboard", { _limit: 100 });
+        return (data ?? []).map((p: { id: string; full_name: string; total_points: number }) => ({
           id: p.id,
           name: p.full_name,
           points: p.total_points,
@@ -44,9 +40,11 @@ function LeaderboardPage() {
       }
       const ids = Array.from(agg.keys());
       const { data: profs } = ids.length
-        ? await supabase.from("profiles").select("id, full_name").in("id", ids)
+        ? await supabase.rpc("get_public_names", { _ids: ids })
         : { data: [] as { id: string; full_name: string }[] };
-      const nameById = new Map((profs ?? []).map((p) => [p.id, p.full_name]));
+      const nameById = new Map(
+        ((profs ?? []) as { id: string; full_name: string }[]).map((p) => [p.id, p.full_name]),
+      );
       return Array.from(agg.entries())
         .map(([id, points]) => ({ id, name: nameById.get(id) ?? "—", points }))
         .sort((a, b) => b.points - a.points)
