@@ -398,15 +398,19 @@ function QrModal({ activity, onClose }: { activity: Activity; onClose: () => voi
     };
   }, [activity.id]);
 
+  const qrUrl = qr
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/scan?code=${encodeURIComponent(qr)}`
+    : null;
+
   useEffect(() => {
-    if (qr && canvasRef.current) {
-      QRCode.toCanvas(canvasRef.current, qr, {
+    if (qrUrl && canvasRef.current) {
+      QRCode.toCanvas(canvasRef.current, qrUrl, {
         width: 320,
         margin: 2,
         color: { dark: "#0a1f17", light: "#a7f3d0" },
       });
     }
-  }, [qr]);
+  }, [qrUrl]);
 
   function download() {
     if (!canvasRef.current) return;
@@ -432,9 +436,9 @@ function QrModal({ activity, onClose }: { activity: Activity; onClose: () => voi
           <Loader />
         )}
       </div>
-      {qr && (
+      {qrUrl && (
         <div className="mt-4 text-center">
-          <code className="text-xs text-primary break-all">{qr}</code>
+          <code className="text-xs text-primary break-all">{qrUrl}</code>
         </div>
       )}
       <button
