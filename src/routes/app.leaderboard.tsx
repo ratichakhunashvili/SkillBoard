@@ -34,23 +34,24 @@ function LeaderboardPage() {
       const since = new Date();
       if (range === "week") since.setDate(since.getDate() - 7);
       else since.setMonth(since.getMonth() - 1);
-      const { data } = await supabase
+      const { data: rows } = await supabase
         .from("attendance")
-        .select("student_id, points_awarded, profiles(full_name)")
+        .select("student_id, points_awarded")
         .gte("scanned_at", since.toISOString());
-      const agg = new Map<string, { name: string; points: number }>();
-      for (const row of data ?? []) {
-        const cur = agg.get(row.student_id) ?? {
-          name: row.profiles?.full_name ?? "—",
-          points: 0,
-        };
-        cur.points += row.points_awarded;
-        agg.set(row.student_id, cur);
+      const agg = new Map<string, number>();
+      for (const row of rows ?? []) {
+        agg.set(row.student_id, (agg.get(row.student_id) ?? 0) + row.points_awarded);
       }
+      const ids = Array.from(agg.keys());
+      const { data: profs } = ids.length
+        ? await supabase.from("profiles").select("id, full_name").in("id", ids)
+        : { data: [] as { id: string; full_name: string }[] };
+      const nameById = new Map((profs ?? []).map((p) => [p.id, p.full_name]));
       return Array.from(agg.entries())
-        .map(([id, v]) => ({ id, name: v.name, points: v.points }))
+        .map(([id, points]) => ({ id, name: nameById.get(id) ?? "—", points }))
         .sort((a, b) => b.points - a.points)
         .slice(0, 100);
+
     },
   });
 
