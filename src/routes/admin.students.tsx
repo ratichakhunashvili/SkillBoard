@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader } from "@/components/loader";
 import { toast } from "sonner";
-import { Gift, X } from "lucide-react";
+import { Gift, Minus, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin/students")({
   component: StudentsPage,
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin/students")({
 
 function StudentsPage() {
   const qc = useQueryClient();
-  const [bonusFor, setBonusFor] = useState<{ id: string; name: string } | null>(null);
+  const [modalFor, setModalFor] = useState<{ id: string; name: string; mode: "add" | "remove" } | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["all-students"],
