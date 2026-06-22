@@ -436,9 +436,9 @@ function QrModal({ activity, onClose }: { activity: Activity; onClose: () => voi
           <Loader />
         )}
       </div>
-      {qr && (
+      {qrUrl && (
         <div className="mt-4 text-center">
-          <code className="text-xs text-primary break-all">{qr}</code>
+          <code className="text-xs text-primary break-all">{qrUrl}</code>
         </div>
       )}
       <button
