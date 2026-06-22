@@ -5,7 +5,7 @@ import QRCode from "qrcode";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader } from "@/components/loader";
 import { toast } from "sonner";
-import { Plus, QrCode, Trash2, Power, X, Download } from "lucide-react";
+import { Plus, QrCode, Trash2, Power, X, Download, Users, UserMinus } from "lucide-react";
 
 export const Route = createFileRoute("/admin/activities")({
   component: ActivitiesPage,
