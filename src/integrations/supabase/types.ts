@@ -212,6 +212,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_remove_attendance: {
+        Args: { _attendance_id: string }
+        Returns: Json
+      }
       award_bonus_points: {
         Args: { _points: number; _reason: string; _student: string }
         Returns: Json
