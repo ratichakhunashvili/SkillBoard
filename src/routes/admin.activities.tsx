@@ -20,7 +20,6 @@ type Activity = {
   end_time: string | null;
   points: number;
   max_scans_per_student: number;
-  qr_code: string;
   is_active: boolean;
 };
 
@@ -35,7 +34,7 @@ function ActivitiesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("activities")
-        .select("*")
+        .select("id,name,description,event_date,start_time,end_time,points,max_scans_per_student,is_active")
         .order("event_date", { ascending: false });
       if (error) throw error;
       return data as Activity[];
@@ -291,15 +290,34 @@ function ActivityForm({
 
 function QrModal({ activity, onClose }: { activity: Activity; onClose: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [qr, setQr] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    if (canvasRef.current) {
-      QRCode.toCanvas(canvasRef.current, activity.qr_code, {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.rpc("get_activity_qr", { _activity_id: activity.id });
+      if (cancelled) return;
+      if (error || !data) {
+        setError(error?.message ?? "Failed to load QR");
+        return;
+      }
+      setQr(data as string);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [activity.id]);
+
+  useEffect(() => {
+    if (qr && canvasRef.current) {
+      QRCode.toCanvas(canvasRef.current, qr, {
         width: 320,
         margin: 2,
         color: { dark: "#0a1f17", light: "#a7f3d0" },
       });
     }
-  }, [activity.qr_code]);
+  }, [qr]);
 
   function download() {
     if (!canvasRef.current) return;
@@ -316,15 +334,24 @@ function QrModal({ activity, onClose }: { activity: Activity; onClose: () => voi
       <p className="text-xs text-muted-foreground mb-4">
         Print or display this QR for students to scan.
       </p>
-      <div className="bg-white/5 rounded-2xl p-4 flex items-center justify-center">
-        <canvas ref={canvasRef} />
+      <div className="bg-white/5 rounded-2xl p-4 flex items-center justify-center min-h-[200px]">
+        {error ? (
+          <span className="text-xs text-destructive">{error}</span>
+        ) : qr ? (
+          <canvas ref={canvasRef} />
+        ) : (
+          <Loader />
+        )}
       </div>
-      <div className="mt-4 text-center">
-        <code className="text-xs text-primary break-all">{activity.qr_code}</code>
-      </div>
+      {qr && (
+        <div className="mt-4 text-center">
+          <code className="text-xs text-primary break-all">{qr}</code>
+        </div>
+      )}
       <button
         onClick={download}
-        className="w-full mt-4 bg-primary text-primary-foreground rounded-xl py-2.5 font-medium glow flex items-center justify-center gap-2"
+        disabled={!qr}
+        className="w-full mt-4 bg-primary text-primary-foreground rounded-xl py-2.5 font-medium glow flex items-center justify-center gap-2 disabled:opacity-60"
       >
         <Download className="h-4 w-4" /> Download PNG
       </button>

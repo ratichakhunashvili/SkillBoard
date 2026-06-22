@@ -216,6 +216,7 @@ export type Database = {
         Args: { _points: number; _reason: string; _student: string }
         Returns: Json
       }
+      get_activity_qr: { Args: { _activity_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
