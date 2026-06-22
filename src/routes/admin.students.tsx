@@ -80,6 +80,13 @@ function StudentsPage() {
                       >
                         <Minus className="h-3 w-3" /> Remove
                       </button>
+                      <button
+                        onClick={() => setDeleteFor({ id: s.id, name: s.full_name })}
+                        className="glass rounded-lg px-2.5 py-1 text-xs flex items-center gap-1 text-destructive hover:bg-destructive/10"
+                        title="Delete user account"
+                      >
+                        <Trash2 className="h-3 w-3" /> Delete
+                      </button>
                     </div>
                   </td>
                 </tr>
