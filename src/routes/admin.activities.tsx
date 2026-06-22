@@ -20,7 +20,6 @@ type Activity = {
   end_time: string | null;
   points: number;
   max_scans_per_student: number;
-  qr_code: string;
   is_active: boolean;
 };
 
