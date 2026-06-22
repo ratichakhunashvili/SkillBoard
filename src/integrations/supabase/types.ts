@@ -212,6 +212,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_user: { Args: { _user_id: string }; Returns: Json }
       admin_remove_attendance: {
         Args: { _attendance_id: string }
         Returns: Json

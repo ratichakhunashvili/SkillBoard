@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader } from "@/components/loader";
 import { toast } from "sonner";
-import { Gift, Minus, X } from "lucide-react";
+import { Gift, Minus, Trash2, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin/students")({
   component: StudentsPage,
@@ -13,6 +13,22 @@ export const Route = createFileRoute("/admin/students")({
 function StudentsPage() {
   const qc = useQueryClient();
   const [modalFor, setModalFor] = useState<{ id: string; name: string; mode: "add" | "remove" } | null>(null);
+  const [deleteFor, setDeleteFor] = useState<{ id: string; name: string } | null>(null);
+
+  const deleteMut = useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase.rpc("admin_delete_user", { _user_id: id });
+      if (error) throw error;
+      const res = data as { ok: boolean; error?: string };
+      if (!res.ok) throw new Error(res.error ?? "Failed");
+    },
+    onSuccess: () => {
+      toast.success(`Removed ${deleteFor?.name}`);
+      setDeleteFor(null);
+      qc.invalidateQueries({ queryKey: ["all-students"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ["all-students"],
@@ -64,6 +80,13 @@ function StudentsPage() {
                       >
                         <Minus className="h-3 w-3" /> Remove
                       </button>
+                      <button
+                        onClick={() => setDeleteFor({ id: s.id, name: s.full_name })}
+                        className="glass rounded-lg px-2.5 py-1 text-xs flex items-center gap-1 text-destructive hover:bg-destructive/10"
+                        title="Delete user account"
+                      >
+                        <Trash2 className="h-3 w-3" /> Delete
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -83,6 +106,36 @@ function StudentsPage() {
             qc.invalidateQueries({ queryKey: ["all-students"] });
           }}
         />
+      )}
+
+      {deleteFor && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => !deleteMut.isPending && setDeleteFor(null)}
+        >
+          <div onClick={(e) => e.stopPropagation()} className="glass rounded-3xl p-6 w-full max-w-sm">
+            <h2 className="text-lg font-semibold">Delete user?</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              This permanently removes <strong>{deleteFor.name}</strong>, their points, attendance, and achievements. They will need to register again to return.
+            </p>
+            <div className="flex gap-2 mt-5">
+              <button
+                onClick={() => setDeleteFor(null)}
+                disabled={deleteMut.isPending}
+                className="flex-1 glass rounded-xl py-2.5 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteMut.mutate(deleteFor.id)}
+                disabled={deleteMut.isPending}
+                className="flex-1 rounded-xl py-2.5 text-sm font-medium bg-destructive text-destructive-foreground disabled:opacity-60"
+              >
+                {deleteMut.isPending ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
