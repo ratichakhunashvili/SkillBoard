@@ -75,14 +75,48 @@ function AuthPage() {
     }
   }
 
+  async function oauth(provider: "google" | "apple") {
+    try {
+      const result = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) throw result.error;
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : `${provider} sign-in failed`);
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-md glass rounded-3xl p-8">
         <div className="text-center mb-6">
           <div className="text-2xl font-bold text-gradient">SkillBoard</div>
           <p className="text-sm text-muted-foreground mt-1">
             {mode === "login" ? "Welcome back" : "Create your account"}
           </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <button
+            type="button"
+            onClick={() => oauth("google")}
+            className="glass rounded-xl py-2.5 text-sm font-medium hover:bg-accent transition flex items-center justify-center gap-2"
+          >
+            <GoogleIcon /> Google
+          </button>
+          <button
+            type="button"
+            onClick={() => oauth("apple")}
+            className="glass rounded-xl py-2.5 text-sm font-medium hover:bg-accent transition flex items-center justify-center gap-2"
+          >
+            <AppleIcon /> Apple
+          </button>
+        </div>
+        <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-muted-foreground my-4">
+          <span className="flex-1 h-px bg-border" /> or with email <span className="flex-1 h-px bg-border" />
         </div>
 
         <div className="flex gap-1 p-1 glass rounded-xl mb-6">
