@@ -117,6 +117,12 @@ function ActivitiesPage() {
                   <QrCode className="h-3 w-3" /> QR
                 </button>
                 <button
+                  onClick={() => setLogFor(a)}
+                  className="glass rounded-lg px-3 py-1.5 text-xs flex items-center gap-1 hover:bg-white/10"
+                >
+                  <Users className="h-3 w-3" /> Log
+                </button>
+                <button
                   onClick={() => {
                     setEditing(a);
                     setShowForm(true);
