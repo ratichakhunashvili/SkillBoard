@@ -90,15 +90,17 @@ function StudentsPage() {
 
 function BonusModal({
   student,
+  initialMode = "add",
   onClose,
   onDone,
 }: {
   student: { id: string; name: string };
+  initialMode?: "add" | "remove";
   onClose: () => void;
   onDone: () => void;
 }) {
   const [points, setPoints] = useState(10);
-  const [direction, setDirection] = useState<"add" | "remove">("add");
+  const [direction, setDirection] = useState<"add" | "remove">(initialMode);
   const [reason, setReason] = useState("");
   const signed = direction === "add" ? Math.abs(points) : -Math.abs(points);
 
