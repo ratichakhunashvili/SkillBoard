@@ -44,18 +44,43 @@ function ScanPage() {
   }
 
   async function startScanner() {
+    if (!window.isSecureContext) {
+      toast.error("Camera needs HTTPS. Open the published site or use 'Open in new tab'.");
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      toast.error("This browser doesn't expose camera APIs.");
+      return;
+    }
     setScanning(true);
     try {
-      const inst = new Html5Qrcode("qr-reader");
+      // Request permission with a direct user-gesture call first.
+      const probe = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+      });
+      probe.getTracks().forEach((t) => t.stop());
+
+      const inst = new Html5Qrcode("qr-reader", { verbose: false });
       scannerRef.current = inst;
-      await inst.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 240, height: 240 } },
-        (decoded) => submitCode(decoded),
-        () => {},
-      );
+
+      const config = { fps: 10, qrbox: { width: 240, height: 240 }, aspectRatio: 1 };
+      try {
+        await inst.start({ facingMode: { ideal: "environment" } }, config,
+          (decoded) => submitCode(decoded), () => {});
+      } catch {
+        // Fallback: pick first available camera by id (some browsers reject facingMode).
+        const cams = await Html5Qrcode.getCameras();
+        if (!cams.length) throw new Error("No cameras found");
+        const back = cams.find((c) => /back|rear|environment/i.test(c.label)) ?? cams[cams.length - 1];
+        await inst.start(back.id, config, (decoded) => submitCode(decoded), () => {});
+      }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Camera unavailable");
+      const name = (err as { name?: string })?.name;
+      let msg = err instanceof Error ? err.message : "Camera unavailable";
+      if (name === "NotAllowedError") msg = "Permission denied. Allow camera in your browser/site settings.";
+      else if (name === "NotFoundError") msg = "No camera detected on this device.";
+      else if (name === "NotReadableError") msg = "Camera is in use by another app.";
+      toast.error(msg);
       setScanning(false);
     }
   }
