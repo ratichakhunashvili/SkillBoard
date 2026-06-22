@@ -28,6 +28,7 @@ function ActivitiesPage() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
   const [qrFor, setQrFor] = useState<Activity | null>(null);
+  const [logFor, setLogFor] = useState<Activity | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["activities"],
