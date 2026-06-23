@@ -28,7 +28,6 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
-  const [seeding, setSeeding] = useState(false);
 
   useEffect(() => {
     if (!loading && user && role) {
