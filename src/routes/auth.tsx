@@ -172,20 +172,6 @@ function AuthPage() {
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-white/5">
-          <button
-            onClick={seedDemo}
-            disabled={seeding}
-            className="w-full glass rounded-xl py-2.5 text-sm hover:bg-white/10 transition disabled:opacity-60 flex items-center justify-center gap-2"
-          >
-            {seeding && <Loader2 className="h-4 w-4 animate-spin" />}
-            Create demo accounts
-          </button>
-          <p className="text-[11px] text-muted-foreground mt-2 text-center">
-            Seeds <code>admin@demo.test</code> and <code>student@demo.test</code> with password{" "}
-            <code>demo1234</code>.
-          </p>
-        </div>
       </div>
     </div>
   );
