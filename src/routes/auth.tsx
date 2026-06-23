@@ -28,7 +28,6 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
-  const [seeding, setSeeding] = useState(false);
 
   useEffect(() => {
     if (!loading && user && role) {
@@ -78,22 +77,6 @@ function AuthPage() {
     }
   }
 
-  async function seedDemo() {
-    setSeeding(true);
-    try {
-      const res = await fetch("/api/public/seed-demo", { method: "POST" });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Seed failed");
-      toast.success("Demo accounts ready. Try admin@demo.test / demo1234");
-      setEmail("admin@demo.test");
-      setPassword("demo1234");
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Seed failed";
-      toast.error(message);
-    } finally {
-      setSeeding(false);
-    }
-  }
 
   async function oauth(provider: "google" | "apple") {
     try {
@@ -189,20 +172,6 @@ function AuthPage() {
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-white/5">
-          <button
-            onClick={seedDemo}
-            disabled={seeding}
-            className="w-full glass rounded-xl py-2.5 text-sm hover:bg-white/10 transition disabled:opacity-60 flex items-center justify-center gap-2"
-          >
-            {seeding && <Loader2 className="h-4 w-4 animate-spin" />}
-            Create demo accounts
-          </button>
-          <p className="text-[11px] text-muted-foreground mt-2 text-center">
-            Seeds <code>admin@demo.test</code> and <code>student@demo.test</code> with password{" "}
-            <code>demo1234</code>.
-          </p>
-        </div>
       </div>
     </div>
   );
