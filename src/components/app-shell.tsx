@@ -7,7 +7,6 @@ import { ThemeToggle } from "@/components/theme-toggle";
 
 const studentNav = [
   { to: "/app", label: "Overview", icon: LayoutDashboard },
-  { to: "/app/calendar", label: "Calendar", icon: CalendarDays },
   { to: "/app/scan", label: "Scan QR", icon: QrCode },
   { to: "/app/leaderboard", label: "Leaderboard", icon: Trophy },
   { to: "/app/history", label: "History", icon: History },
