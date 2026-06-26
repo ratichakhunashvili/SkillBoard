@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader } from "@/components/loader";
-import { Trophy, Sparkles, Calendar, Award, CalendarDays } from "lucide-react";
-import { CalendarPanel } from "@/components/calendar-panel";
+import { Trophy, Sparkles, Calendar, Award } from "lucide-react";
+import { ActivitiesList } from "@/components/activities-list";
 
 export const Route = createFileRoute("/app/")({
   component: StudentHome,
