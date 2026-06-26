@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader } from "@/components/loader";
-import { Trophy, Sparkles, Calendar, Award } from "lucide-react";
+import { Trophy, Sparkles, Calendar, Award, CalendarDays } from "lucide-react";
+import { CalendarPanel } from "@/components/calendar-panel";
 
 export const Route = createFileRoute("/app/")({
   component: StudentHome,
@@ -46,27 +47,15 @@ function StudentHome() {
   if (isLoading || !data) return <Loader />;
 
   const stats = [
-    {
-      label: "Total Points",
-      value: data.profile?.total_points ?? 0,
-      icon: Sparkles,
-    },
+    { label: "Total Points", value: data.profile?.total_points ?? 0, icon: Sparkles },
     {
       label: "Global Rank",
       value: data.rank ? `#${data.rank}` : "—",
       sub: data.total ? `of ${data.total}` : "",
       icon: Trophy,
     },
-    {
-      label: "Achievements",
-      value: data.achievementCount,
-      icon: Award,
-    },
-    {
-      label: "Activities",
-      value: data.attendance.length,
-      icon: Calendar,
-    },
+    { label: "Achievements", value: data.achievementCount, icon: Award },
+    { label: "Activities", value: data.attendance.length, icon: Calendar },
   ];
 
   return (
@@ -88,6 +77,13 @@ function StudentHome() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="glass rounded-2xl p-4 md:p-6">
+        <div className="font-semibold mb-3 flex items-center gap-2">
+          <CalendarDays className="h-4 w-4 text-primary" /> Activity Calendar
+        </div>
+        <CalendarPanel />
       </div>
 
       <div className="glass rounded-2xl p-6">
