@@ -59,35 +59,35 @@ function StudentHome() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold">
+        <h1 className="text-xl md:text-3xl font-bold">
           Hi, <span className="text-gradient">{data.profile?.full_name || "there"}</span>
         </h1>
-        <p className="text-muted-foreground text-sm">Here's how you're doing.</p>
+        <p className="text-muted-foreground text-xs md:text-sm">Here's how you're doing.</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4">
         {stats.map((s) => (
-          <div key={s.label} className="glass rounded-2xl p-5">
-            <s.icon className="h-5 w-5 text-primary" />
-            <div className="mt-3 text-3xl font-bold">{s.value}</div>
-            <div className="text-xs text-muted-foreground mt-1">
+          <div key={s.label} className="glass rounded-2xl p-3 md:p-5">
+            <s.icon className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+            <div className="mt-2 md:mt-3 text-2xl md:text-3xl font-bold">{s.value}</div>
+            <div className="text-[11px] md:text-xs text-muted-foreground mt-0.5 md:mt-1">
               {s.label} {s.sub && <span>· {s.sub}</span>}
             </div>
           </div>
         ))}
       </div>
 
-      <div className="glass rounded-2xl p-4 md:p-6">
-        <div className="font-semibold mb-3 flex items-center gap-2">
+      <div className="glass rounded-2xl p-3 md:p-6">
+        <div className="font-semibold mb-3 flex items-center gap-2 text-sm md:text-base">
           <CalendarDays className="h-4 w-4 text-primary" /> Activity Calendar
         </div>
         <CalendarPanel />
       </div>
 
-      <div className="glass rounded-2xl p-6">
-        <div className="font-semibold mb-3">Recent activity</div>
+      <div className="glass rounded-2xl p-4 md:p-6">
+        <div className="font-semibold mb-3 text-sm md:text-base">Recent activity</div>
         {data.attendance.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No activity yet — scan a QR code to earn your first points.
@@ -95,14 +95,14 @@ function StudentHome() {
         ) : (
           <ul className="divide-y divide-white/5">
             {data.attendance.map((a) => (
-              <li key={a.id} className="py-3 flex items-center justify-between">
-                <div>
-                  <div className="font-medium text-sm">{a.activities?.name ?? "Activity"}</div>
+              <li key={a.id} className="py-3 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="font-medium text-sm truncate">{a.activities?.name ?? "Activity"}</div>
                   <div className="text-xs text-muted-foreground">
                     {new Date(a.scanned_at).toLocaleString()}
                   </div>
                 </div>
-                <div className="text-primary font-semibold">+{a.points_awarded}</div>
+                <div className="text-primary font-semibold shrink-0">+{a.points_awarded}</div>
               </li>
             ))}
           </ul>

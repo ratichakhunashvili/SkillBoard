@@ -76,29 +76,43 @@ export function AppShell({
           <LogOut className="h-4 w-4" /> Sign out
         </button>
       </aside>
-      <main className="flex-1 p-4 md:p-8 min-w-0">
-        <div className="flex items-center justify-between mb-4 md:mb-6">
+      <main className="flex-1 p-3 md:p-8 min-w-0 pb-24 md:pb-8">
+        <div className="flex items-center justify-between mb-3 md:mb-6">
           <div className="md:hidden text-lg font-bold text-gradient">SkillBoard</div>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-1">
             <ThemeToggle />
+            <button
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = "/auth";
+              }}
+              className="md:hidden p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-white/5"
+              aria-label="Sign out"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </div>
         {title && (
-          <header className="mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{title}</h1>
+          <header className="mb-4 md:mb-6">
+            <h1 className="text-xl md:text-3xl font-bold tracking-tight">{title}</h1>
           </header>
         )}
-        {/* mobile nav */}
-        <nav className="md:hidden glass rounded-2xl p-2 flex gap-1 overflow-x-auto mb-4">
+        {children}
+        {/* mobile bottom nav */}
+        <nav
+          className="md:hidden fixed bottom-0 inset-x-0 z-40 glass border-t border-white/10 flex gap-0.5 overflow-x-auto px-2 py-1.5"
+          style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.375rem)" }}
+        >
           {nav.map((item) => {
             const Icon = item.icon;
-            const active = path === item.to;
+            const active = path === item.to || (item.to !== "/app" && item.to !== "/admin" && path.startsWith(item.to));
             return (
               <Link
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  "flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-[10px] whitespace-nowrap",
+                  "flex-1 min-w-[64px] flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl text-[10px] whitespace-nowrap",
                   active ? "bg-primary/15 text-primary" : "text-muted-foreground",
                 )}
               >
@@ -108,7 +122,6 @@ export function AppShell({
             );
           })}
         </nav>
-        {children}
       </main>
     </div>
   );
