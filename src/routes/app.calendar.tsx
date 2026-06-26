@@ -138,19 +138,19 @@ function CalendarPage() {
         </p>
       </div>
 
-      <div className="glass rounded-2xl p-4 md:p-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="glass rounded-2xl p-3 max-w-sm w-full md:mx-0 mx-auto">
+        <div className="flex items-center justify-between mb-2">
           <button
             onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
-            className="p-2 rounded-lg hover:bg-white/10"
+            className="p-1.5 rounded-lg hover:bg-white/10"
             aria-label="Previous month"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <div className="font-semibold capitalize">{monthLabel}</div>
+          <div className="text-sm font-semibold capitalize">{monthLabel}</div>
           <button
             onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
-            className="p-2 rounded-lg hover:bg-white/10"
+            className="p-1.5 rounded-lg hover:bg-white/10"
             aria-label="Next month"
           >
             <ChevronRight className="h-4 w-4" />
@@ -161,12 +161,12 @@ function CalendarPage() {
           <Loader />
         ) : (
           <>
-            <div className="grid grid-cols-7 gap-1 text-[10px] uppercase tracking-wide text-muted-foreground text-center mb-1">
-              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-                <div key={d} className="py-1">{d}</div>
+            <div className="grid grid-cols-7 gap-0.5 text-[9px] uppercase tracking-wide text-muted-foreground text-center mb-1">
+              {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+                <div key={i} className="py-0.5">{d}</div>
               ))}
             </div>
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-0.5">
               {monthGrid.map((d) => {
                 const key = toDateKey(d);
                 const inMonth = d.getMonth() === cursor.getMonth();
@@ -178,22 +178,20 @@ function CalendarPage() {
                   <button
                     key={key}
                     onClick={() => setSelected(key)}
-                    className={`aspect-square rounded-xl p-1 md:p-2 text-xs flex flex-col items-start justify-start transition-all
+                    className={`relative aspect-square rounded-md text-[11px] flex items-center justify-center transition-all
                       ${inMonth ? "text-foreground" : "text-muted-foreground/40"}
-                      ${isSelected ? "bg-primary text-primary-foreground glow" : "hover:bg-white/10"}
+                      ${isSelected ? "bg-primary text-primary-foreground" : "hover:bg-white/10"}
                       ${isToday && !isSelected ? "ring-1 ring-primary" : ""}
-                      ${past && !isSelected ? "opacity-60" : ""}
+                      ${past && !isSelected ? "opacity-50" : ""}
                     `}
                   >
-                    <span className="text-[10px] md:text-xs font-medium">{d.getDate()}</span>
+                    <span className="font-medium">{d.getDate()}</span>
                     {items.length > 0 && (
                       <span
-                        className={`mt-auto text-[9px] md:text-[10px] rounded-full px-1.5 py-0.5 ${
-                          isSelected ? "bg-white/25" : "bg-primary/20 text-primary"
+                        className={`absolute bottom-1 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full ${
+                          isSelected ? "bg-white" : "bg-primary"
                         }`}
-                      >
-                        {items.length}
-                      </span>
+                      />
                     )}
                   </button>
                 );
