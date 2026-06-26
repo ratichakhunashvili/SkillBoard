@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LogOut, QrCode, Trophy, History, Award, LayoutDashboard, Users, BarChart3, CalendarPlus, UserCircle2, CalendarDays } from "lucide-react";
+import { LogOut, QrCode, Trophy, History, Award, LayoutDashboard, Users, BarChart3, CalendarPlus, UserCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import type { AppRole } from "@/hooks/use-auth";
