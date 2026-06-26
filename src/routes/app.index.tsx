@@ -81,9 +81,9 @@ function StudentHome() {
 
       <div className="glass rounded-2xl p-3 md:p-6">
         <div className="font-semibold mb-3 flex items-center gap-2 text-sm md:text-base">
-          <CalendarDays className="h-4 w-4 text-primary" /> Activity Calendar
+          <Calendar className="h-4 w-4 text-primary" /> Activities
         </div>
-        <CalendarPanel />
+        <ActivitiesList />
       </div>
 
       <div className="glass rounded-2xl p-4 md:p-6">
