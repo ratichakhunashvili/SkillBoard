@@ -158,6 +158,7 @@ export type Database = {
           full_name: string
           id: string
           phone: string | null
+          program: string | null
           student_id: string | null
           total_points: number
         }
@@ -171,6 +172,7 @@ export type Database = {
           full_name?: string
           id: string
           phone?: string | null
+          program?: string | null
           student_id?: string | null
           total_points?: number
         }
@@ -184,6 +186,7 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string | null
+          program?: string | null
           student_id?: string | null
           total_points?: number
         }
