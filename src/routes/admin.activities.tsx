@@ -286,12 +286,21 @@ function LogModal({ activity, onClose }: { activity: Activity; onClose: () => vo
         .order("scanned_at", { ascending: false });
       if (error) throw error;
       const ids = Array.from(new Set((att ?? []).map((a) => a.student_id)));
-      let names: Record<string, string> = {};
+      const info: Record<string, { full_name: string; program: string | null }> = {};
       if (ids.length) {
-        const { data: ppl } = await supabase.rpc("get_public_names", { _ids: ids });
-        for (const p of ppl ?? []) names[p.id] = p.full_name;
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("id, full_name, program")
+          .in("id", ids);
+        for (const p of (profs ?? []) as Array<{ id: string; full_name: string; program: string | null }>) {
+          info[p.id] = { full_name: p.full_name, program: p.program };
+        }
       }
-      return (att ?? []).map((a) => ({ ...a, full_name: names[a.student_id] ?? "Unknown" }));
+      return (att ?? []).map((a) => ({
+        ...a,
+        full_name: info[a.student_id]?.full_name ?? "Unknown",
+        program: info[a.student_id]?.program ?? null,
+      }));
     },
   });
 
