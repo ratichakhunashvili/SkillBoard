@@ -7,6 +7,7 @@ import { Loader } from "@/components/loader";
 import { AVATAR_ICONS, getAvatar, type AvatarKey } from "@/lib/avatar-icons";
 import { toast } from "sonner";
 import { Loader2, Save, ShieldCheck } from "lucide-react";
+import { PROGRAMS } from "@/lib/programs";
 
 export const Route = createFileRoute("/app/profile")({
   head: () => ({ meta: [{ title: "Profile — SkillBoard" }] }),
