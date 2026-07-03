@@ -67,31 +67,62 @@ function StudentsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Students</h1>
-        <p className="text-sm text-muted-foreground">Award bonus points or review profiles.</p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Students</h1>
+          <p className="text-sm text-muted-foreground">Award bonus points, rename, or filter by program.</p>
+        </div>
+        <div>
+          <label className="block text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+            Filter by program
+          </label>
+          <select
+            value={programFilter}
+            onChange={(e) => setProgramFilter(e.target.value)}
+            className="glass rounded-xl px-3 py-2 text-sm bg-transparent"
+          >
+            <option value="" className="bg-background">All programs</option>
+            {PROGRAMS.map((p) => (
+              <option key={p} value={p} className="bg-background">{p}</option>
+            ))}
+            <option value="__none__" className="bg-background">— No program set —</option>
+          </select>
+        </div>
       </div>
       {isLoading || !data ? (
         <Loader />
       ) : (
         <div className="glass rounded-2xl overflow-hidden">
+          <div className="px-3 py-2 text-xs text-muted-foreground border-b border-white/5">
+            {filtered.length} of {data.length} student{data.length === 1 ? "" : "s"}
+          </div>
           <table className="w-full text-sm">
             <thead className="text-xs text-muted-foreground uppercase">
               <tr>
                 <th className="text-left p-3">Name</th>
+                <th className="text-left p-3 hidden sm:table-cell">Program</th>
                 <th className="text-left p-3 hidden md:table-cell">Email</th>
                 <th className="text-right p-3">Points</th>
                 <th className="p-3"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {data.map((s) => (
+              {filtered.map((s) => (
                 <tr key={s.id}>
                   <td className="p-3 font-medium">{s.full_name}</td>
+                  <td className="p-3 text-muted-foreground hidden sm:table-cell">
+                    {s.program ?? <span className="opacity-50">—</span>}
+                  </td>
                   <td className="p-3 text-muted-foreground hidden md:table-cell">{s.email}</td>
                   <td className="p-3 text-right font-semibold">{s.total_points}</td>
                   <td className="p-3 text-right">
-                    <div className="flex gap-1.5 justify-end">
+                    <div className="flex gap-1.5 justify-end flex-wrap">
+                      <button
+                        onClick={() => setRenameFor({ id: s.id, name: s.full_name })}
+                        className="glass rounded-lg px-2.5 py-1 text-xs flex items-center gap-1 hover:bg-white/10"
+                      >
+                        <Pencil className="h-3 w-3" /> Rename
+                      </button>
                       <button
                         onClick={() => setModalFor({ id: s.id, name: s.full_name, mode: "add" })}
                         className="glass rounded-lg px-2.5 py-1 text-xs flex items-center gap-1 hover:bg-white/10"
@@ -118,6 +149,17 @@ function StudentsPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {renameFor && (
+        <RenameModal
+          student={renameFor}
+          onClose={() => setRenameFor(null)}
+          onDone={() => {
+            setRenameFor(null);
+            qc.invalidateQueries({ queryKey: ["all-students"] });
+          }}
+        />
       )}
 
       {modalFor && (
