@@ -43,13 +43,27 @@ function StudentsPage() {
       const adminIds = (admins ?? []).map((r) => r.user_id);
       let q = supabase
         .from("profiles")
-        .select("id, full_name, email, total_points, created_at")
+        .select("id, full_name, email, total_points, created_at, program")
         .order("total_points", { ascending: false });
       if (adminIds.length) q = q.not("id", "in", `(${adminIds.join(",")})`);
       const { data } = await q;
-      return data ?? [];
+      return (data ?? []) as Array<{
+        id: string;
+        full_name: string;
+        email: string;
+        total_points: number;
+        created_at: string;
+        program: string | null;
+      }>;
     },
   });
+
+  const filtered = useMemo(() => {
+    if (!data) return [];
+    if (!programFilter) return data;
+    if (programFilter === "__none__") return data.filter((s) => !s.program);
+    return data.filter((s) => s.program === programFilter);
+  }, [data, programFilter]);
 
   return (
     <div className="space-y-6">
