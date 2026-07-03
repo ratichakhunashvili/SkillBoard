@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader } from "@/components/loader";
 import { toast } from "sonner";
-import { Gift, Minus, Trash2, X } from "lucide-react";
+import { Gift, Minus, Pencil, Trash2, X } from "lucide-react";
+import { PROGRAMS } from "@/lib/programs";
 
 export const Route = createFileRoute("/admin/students")({
   component: StudentsPage,
@@ -14,6 +15,8 @@ function StudentsPage() {
   const qc = useQueryClient();
   const [modalFor, setModalFor] = useState<{ id: string; name: string; mode: "add" | "remove" } | null>(null);
   const [deleteFor, setDeleteFor] = useState<{ id: string; name: string } | null>(null);
+  const [renameFor, setRenameFor] = useState<{ id: string; name: string } | null>(null);
+  const [programFilter, setProgramFilter] = useState<string>("");
 
   const deleteMut = useMutation({
     mutationFn: async (id: string) => {
