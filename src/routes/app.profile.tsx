@@ -151,11 +151,26 @@ function ProfilePage() {
           <Field label="Phone" value={phone} onChange={setPhone} placeholder="+1 555 0123" />
           <Field label="Student ID" value={studentId} onChange={setStudentId} />
           <Field
-            label="Department / Program"
+            label="Department"
             value={department}
             onChange={setDepartment}
             placeholder="e.g. Computer Science"
           />
+          <div>
+            <label className="text-xs text-muted-foreground">Program</label>
+            <select
+              value={program}
+              onChange={(e) => setProgram(e.target.value)}
+              className="mt-1 w-full glass rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40 bg-transparent"
+            >
+              <option value="" className="bg-background">— Select a program —</option>
+              {PROGRAMS.map((p) => (
+                <option key={p} value={p} className="bg-background">
+                  {p}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div>
           <label className="text-xs text-muted-foreground">Bio</label>
