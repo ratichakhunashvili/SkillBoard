@@ -313,3 +313,62 @@ function BonusModal({
   );
 }
 
+
+function RenameModal({
+  student,
+  onClose,
+  onDone,
+}: {
+  student: { id: string; name: string };
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const [name, setName] = useState(student.name);
+  const mut = useMutation({
+    mutationFn: async () => {
+      const trimmed = name.trim();
+      if (!trimmed) throw new Error("Name cannot be empty");
+      const { error } = await supabase
+        .from("profiles")
+        .update({ full_name: trimmed })
+        .eq("id", student.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Renamed");
+      onDone();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
+  });
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div onClick={(e) => e.stopPropagation()} className="glass rounded-3xl p-6 w-full max-w-sm relative">
+        <button onClick={onClose} className="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-accent">
+          <X className="h-4 w-4" />
+        </button>
+        <h2 className="text-lg font-semibold">Rename student</h2>
+        <p className="text-sm text-muted-foreground mb-4">Currently: {student.name}</p>
+        <label className="block">
+          <span className="text-xs text-muted-foreground">Full name</span>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoFocus
+            className="w-full mt-1 glass rounded-xl px-3 py-2 text-sm bg-transparent"
+          />
+        </label>
+        <button
+          disabled={mut.isPending}
+          onClick={() => mut.mutate()}
+          className="w-full mt-5 rounded-xl py-2.5 font-medium glow bg-primary text-primary-foreground disabled:opacity-60"
+        >
+          {mut.isPending ? "Saving…" : "Save name"}
+        </button>
+      </div>
+    </div>
+  );
+}
