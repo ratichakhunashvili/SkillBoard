@@ -7,6 +7,7 @@ import { Loader } from "@/components/loader";
 import { AVATAR_ICONS, getAvatar, type AvatarKey } from "@/lib/avatar-icons";
 import { toast } from "sonner";
 import { Loader2, Save, ShieldCheck } from "lucide-react";
+import { PROGRAMS } from "@/lib/programs";
 
 export const Route = createFileRoute("/app/profile")({
   head: () => ({ meta: [{ title: "Profile — SkillBoard" }] }),
@@ -37,6 +38,7 @@ function ProfilePage() {
   const [bio, setBio] = useState("");
   const [studentId, setStudentId] = useState("");
   const [department, setDepartment] = useState("");
+  const [program, setProgram] = useState("");
   const [icon, setIcon] = useState<AvatarKey>("spark");
   const [saving, setSaving] = useState(false);
 
@@ -47,6 +49,7 @@ function ProfilePage() {
     setBio(data.bio ?? "");
     setStudentId(data.student_id ?? "");
     setDepartment(data.department ?? "");
+    setProgram((data as { program?: string | null }).program ?? "");
     setIcon((data.avatar_icon as AvatarKey) ?? "spark");
   }, [data]);
 
@@ -62,8 +65,9 @@ function ProfilePage() {
           bio,
           student_id: studentId,
           department,
+          program: program || null,
           avatar_icon: icon,
-        })
+        } as never)
         .eq("id", uid);
       if (error) throw error;
       toast.success("Profile updated");
@@ -147,11 +151,26 @@ function ProfilePage() {
           <Field label="Phone" value={phone} onChange={setPhone} placeholder="+1 555 0123" />
           <Field label="Student ID" value={studentId} onChange={setStudentId} />
           <Field
-            label="Department / Program"
+            label="Department"
             value={department}
             onChange={setDepartment}
             placeholder="e.g. Computer Science"
           />
+          <div>
+            <label className="text-xs text-muted-foreground">Program</label>
+            <select
+              value={program}
+              onChange={(e) => setProgram(e.target.value)}
+              className="mt-1 w-full glass rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40 bg-transparent"
+            >
+              <option value="" className="bg-background">— Select a program —</option>
+              {PROGRAMS.map((p) => (
+                <option key={p} value={p} className="bg-background">
+                  {p}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div>
           <label className="text-xs text-muted-foreground">Bio</label>

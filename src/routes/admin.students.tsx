@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader } from "@/components/loader";
 import { toast } from "sonner";
-import { Gift, Minus, Trash2, X } from "lucide-react";
+import { Gift, Minus, Pencil, Trash2, X } from "lucide-react";
+import { PROGRAMS } from "@/lib/programs";
 
 export const Route = createFileRoute("/admin/students")({
   component: StudentsPage,
@@ -14,6 +15,8 @@ function StudentsPage() {
   const qc = useQueryClient();
   const [modalFor, setModalFor] = useState<{ id: string; name: string; mode: "add" | "remove" } | null>(null);
   const [deleteFor, setDeleteFor] = useState<{ id: string; name: string } | null>(null);
+  const [renameFor, setRenameFor] = useState<{ id: string; name: string } | null>(null);
+  const [programFilter, setProgramFilter] = useState<string>("");
 
   const deleteMut = useMutation({
     mutationFn: async (id: string) => {
@@ -40,41 +43,86 @@ function StudentsPage() {
       const adminIds = (admins ?? []).map((r) => r.user_id);
       let q = supabase
         .from("profiles")
-        .select("id, full_name, email, total_points, created_at")
+        .select("id, full_name, email, total_points, created_at, program")
         .order("total_points", { ascending: false });
       if (adminIds.length) q = q.not("id", "in", `(${adminIds.join(",")})`);
       const { data } = await q;
-      return data ?? [];
+      return (data ?? []) as Array<{
+        id: string;
+        full_name: string;
+        email: string;
+        total_points: number;
+        created_at: string;
+        program: string | null;
+      }>;
     },
   });
 
+  const filtered = useMemo(() => {
+    if (!data) return [];
+    if (!programFilter) return data;
+    if (programFilter === "__none__") return data.filter((s) => !s.program);
+    return data.filter((s) => s.program === programFilter);
+  }, [data, programFilter]);
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Students</h1>
-        <p className="text-sm text-muted-foreground">Award bonus points or review profiles.</p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Students</h1>
+          <p className="text-sm text-muted-foreground">Award bonus points, rename, or filter by program.</p>
+        </div>
+        <div>
+          <label className="block text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+            Filter by program
+          </label>
+          <select
+            value={programFilter}
+            onChange={(e) => setProgramFilter(e.target.value)}
+            className="glass rounded-xl px-3 py-2 text-sm bg-transparent"
+          >
+            <option value="" className="bg-background">All programs</option>
+            {PROGRAMS.map((p) => (
+              <option key={p} value={p} className="bg-background">{p}</option>
+            ))}
+            <option value="__none__" className="bg-background">— No program set —</option>
+          </select>
+        </div>
       </div>
       {isLoading || !data ? (
         <Loader />
       ) : (
         <div className="glass rounded-2xl overflow-hidden">
+          <div className="px-3 py-2 text-xs text-muted-foreground border-b border-white/5">
+            {filtered.length} of {data.length} student{data.length === 1 ? "" : "s"}
+          </div>
           <table className="w-full text-sm">
             <thead className="text-xs text-muted-foreground uppercase">
               <tr>
                 <th className="text-left p-3">Name</th>
+                <th className="text-left p-3 hidden sm:table-cell">Program</th>
                 <th className="text-left p-3 hidden md:table-cell">Email</th>
                 <th className="text-right p-3">Points</th>
                 <th className="p-3"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {data.map((s) => (
+              {filtered.map((s) => (
                 <tr key={s.id}>
                   <td className="p-3 font-medium">{s.full_name}</td>
+                  <td className="p-3 text-muted-foreground hidden sm:table-cell">
+                    {s.program ?? <span className="opacity-50">—</span>}
+                  </td>
                   <td className="p-3 text-muted-foreground hidden md:table-cell">{s.email}</td>
                   <td className="p-3 text-right font-semibold">{s.total_points}</td>
                   <td className="p-3 text-right">
-                    <div className="flex gap-1.5 justify-end">
+                    <div className="flex gap-1.5 justify-end flex-wrap">
+                      <button
+                        onClick={() => setRenameFor({ id: s.id, name: s.full_name })}
+                        className="glass rounded-lg px-2.5 py-1 text-xs flex items-center gap-1 hover:bg-white/10"
+                      >
+                        <Pencil className="h-3 w-3" /> Rename
+                      </button>
                       <button
                         onClick={() => setModalFor({ id: s.id, name: s.full_name, mode: "add" })}
                         className="glass rounded-lg px-2.5 py-1 text-xs flex items-center gap-1 hover:bg-white/10"
@@ -101,6 +149,17 @@ function StudentsPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {renameFor && (
+        <RenameModal
+          student={renameFor}
+          onClose={() => setRenameFor(null)}
+          onDone={() => {
+            setRenameFor(null);
+            qc.invalidateQueries({ queryKey: ["all-students"] });
+          }}
+        />
       )}
 
       {modalFor && (
@@ -254,3 +313,62 @@ function BonusModal({
   );
 }
 
+
+function RenameModal({
+  student,
+  onClose,
+  onDone,
+}: {
+  student: { id: string; name: string };
+  onClose: () => void;
+  onDone: () => void;
+}) {
+  const [name, setName] = useState(student.name);
+  const mut = useMutation({
+    mutationFn: async () => {
+      const trimmed = name.trim();
+      if (!trimmed) throw new Error("Name cannot be empty");
+      const { error } = await supabase
+        .from("profiles")
+        .update({ full_name: trimmed })
+        .eq("id", student.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Renamed");
+      onDone();
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
+  });
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div onClick={(e) => e.stopPropagation()} className="glass rounded-3xl p-6 w-full max-w-sm relative">
+        <button onClick={onClose} className="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-accent">
+          <X className="h-4 w-4" />
+        </button>
+        <h2 className="text-lg font-semibold">Rename student</h2>
+        <p className="text-sm text-muted-foreground mb-4">Currently: {student.name}</p>
+        <label className="block">
+          <span className="text-xs text-muted-foreground">Full name</span>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoFocus
+            className="w-full mt-1 glass rounded-xl px-3 py-2 text-sm bg-transparent"
+          />
+        </label>
+        <button
+          disabled={mut.isPending}
+          onClick={() => mut.mutate()}
+          className="w-full mt-5 rounded-xl py-2.5 font-medium glow bg-primary text-primary-foreground disabled:opacity-60"
+        >
+          {mut.isPending ? "Saving…" : "Save name"}
+        </button>
+      </div>
+    </div>
+  );
+}
