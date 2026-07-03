@@ -38,6 +38,7 @@ function ProfilePage() {
   const [bio, setBio] = useState("");
   const [studentId, setStudentId] = useState("");
   const [department, setDepartment] = useState("");
+  const [program, setProgram] = useState("");
   const [icon, setIcon] = useState<AvatarKey>("spark");
   const [saving, setSaving] = useState(false);
 
@@ -48,6 +49,7 @@ function ProfilePage() {
     setBio(data.bio ?? "");
     setStudentId(data.student_id ?? "");
     setDepartment(data.department ?? "");
+    setProgram((data as { program?: string | null }).program ?? "");
     setIcon((data.avatar_icon as AvatarKey) ?? "spark");
   }, [data]);
 
