@@ -65,8 +65,9 @@ function ProfilePage() {
           bio,
           student_id: studentId,
           department,
+          program: program || null,
           avatar_icon: icon,
-        })
+        } as never)
         .eq("id", uid);
       if (error) throw error;
       toast.success("Profile updated");
