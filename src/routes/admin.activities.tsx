@@ -343,7 +343,7 @@ function LogModal({ activity, onClose }: { activity: Activity; onClose: () => vo
               <div className="min-w-0">
                 <div className="text-sm font-medium truncate">{row.full_name}</div>
                 <div className="text-[11px] text-muted-foreground">
-                  {new Date(row.scanned_at).toLocaleString()} · {row.points_awarded} pts
+                  {row.program ?? "No program"} · {new Date(row.scanned_at).toLocaleString()} · {row.points_awarded} pts
                 </div>
               </div>
               <button
